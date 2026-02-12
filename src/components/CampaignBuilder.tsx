@@ -25,6 +25,7 @@ interface ServiceSelection {
   budget: number;
   categoryIndex: number;
   youtubeAdTypes: Record<number, YouTubeAdType>;
+  creatives: number;
 }
 
 type Selections = Record<string, ServiceSelection>;
@@ -35,6 +36,7 @@ const defaultSelection = (): ServiceSelection => ({
   budget: 2000,
   categoryIndex: 0,
   youtubeAdTypes: {},
+  creatives: 0,
 });
 
 
@@ -75,9 +77,9 @@ function calcServiceCost(
   if (service.budgetBased) {
     if (service.id === "instagram") return sel.budget;
     if (service.id === "paid-amplification") {
-      const creative = 1000;
+      const creativeCost = sel.creatives * 100;
       const fee = calcTieredFee(sel.budget);
-      return creative + sel.budget + fee;
+      return creativeCost + sel.budget + fee;
     }
     return sel.budget;
   }
@@ -358,20 +360,22 @@ function ServiceRow({
   const paidAmpBreakdown = useMemo(() => {
     if (!isPaidAmp) return null;
     const fee = calcTieredFee(sel.budget);
+    const creativeCost = sel.creatives * 100;
     return {
       spend: sel.budget,
       fee: Math.round(fee),
-      creative: 1000,
-      total: sel.budget + Math.round(fee) + 1000,
+      creatives: sel.creatives,
+      creativeCost,
+      total: sel.budget + Math.round(fee) + creativeCost,
     };
-  }, [isPaidAmp, sel.budget]);
+  }, [isPaidAmp, sel.budget, sel.creatives]);
 
   // Instagram seeding breakdown
   const instagramBreakdown = useMemo(() => {
     if (!isInstagram) return null;
     const adSpend = Math.round(sel.budget * 0.7);
     const serviceFee = Math.round(sel.budget * 0.3);
-    return { adSpend, serviceFee, total: sel.budget };
+    return { adSpend, serviceFee };
   }, [isInstagram, sel.budget]);
 
   return (
@@ -442,22 +446,41 @@ function ServiceRow({
                 </div>
               </>
             ) : isPaidAmp ? (
-              <div className="flex-1 min-w-[200px] space-y-1">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Ad Spend</span>
-                  <span className="font-medium text-foreground">
-                    ${sel.budget.toLocaleString()}
-                  </span>
+              <div className="flex-1 min-w-[200px] space-y-3">
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Ad Spend</span>
+                    <span className="font-medium text-foreground">
+                      ${sel.budget.toLocaleString()}
+                    </span>
+                  </div>
+                  <Slider
+                    value={[sel.budget]}
+                    onValueChange={([v]) =>
+                      onUpdate(service.id, { budget: v })
+                    }
+                    min={minBudget}
+                    max={100000}
+                    step={500}
+                  />
                 </div>
-                <Slider
-                  value={[sel.budget]}
-                  onValueChange={([v]) =>
-                    onUpdate(service.id, { budget: v })
-                  }
-                  min={minBudget}
-                  max={100000}
-                  step={500}
-                />
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Creatives</span>
+                    <span className="font-medium text-foreground">
+                      {sel.creatives === 0 ? "None" : `${sel.creatives} ($${(sel.creatives * 100).toLocaleString()})`}
+                    </span>
+                  </div>
+                  <Slider
+                    value={[sel.creatives]}
+                    onValueChange={([v]) =>
+                      onUpdate(service.id, { creatives: v < 5 ? 0 : v })
+                    }
+                    min={0}
+                    max={50}
+                    step={1}
+                  />
+                </div>
                 {paidAmpBreakdown && (
                   <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground mt-1">
                     <span>
@@ -466,7 +489,11 @@ function ServiceRow({
                     <span>
                       Mgmt Fee: ${paidAmpBreakdown.fee.toLocaleString()}
                     </span>
-                    <span>Creative: $1,000</span>
+                    {paidAmpBreakdown.creatives > 0 && (
+                      <span>
+                        Creatives ({paidAmpBreakdown.creatives}): ${paidAmpBreakdown.creativeCost.toLocaleString()}
+                      </span>
+                    )}
                     <span className="font-medium text-foreground">
                       Total: ${paidAmpBreakdown.total.toLocaleString()}
                     </span>
@@ -493,13 +520,10 @@ function ServiceRow({
                 {instagramBreakdown && (
                   <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground mt-1">
                     <span>
-                      Ad Spend (70%): ${instagramBreakdown.adSpend.toLocaleString()}
+                      Ad Spend: ${instagramBreakdown.adSpend.toLocaleString()}
                     </span>
                     <span>
-                      Service Fee (30%): ${instagramBreakdown.serviceFee.toLocaleString()}
-                    </span>
-                    <span className="font-medium text-foreground">
-                      Total: ${instagramBreakdown.total.toLocaleString()}
+                      Service Fee: ${instagramBreakdown.serviceFee.toLocaleString()}
                     </span>
                   </div>
                 )}
