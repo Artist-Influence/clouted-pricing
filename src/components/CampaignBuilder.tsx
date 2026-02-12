@@ -1,7 +1,8 @@
 import { useState, useMemo, useCallback } from "react";
-import { services, type Service } from "@/data/services";
+import { services, type Service, type PricingItem } from "@/data/services";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -12,11 +13,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import GlassPanel from "@/components/deck/GlassPanel";
 
+/* ── YouTube multi-select model ── */
+interface YouTubeAdType {
+  enabled: boolean;
+  budget: number;
+}
+
 interface ServiceSelection {
   enabled: boolean;
   tierIndex: number;
   budget: number;
   categoryIndex: number;
+  youtubeAdTypes: Record<number, YouTubeAdType>;
 }
 
 type Selections = Record<string, ServiceSelection>;
@@ -26,6 +34,7 @@ const defaultSelection = (): ServiceSelection => ({
   tierIndex: 0,
   budget: 2000,
   categoryIndex: 0,
+  youtubeAdTypes: {},
 });
 
 const presets: Record<string, Record<string, Partial<ServiceSelection>>> = {
@@ -49,6 +58,13 @@ const presets: Record<string, Record<string, Partial<ServiceSelection>>> = {
     trending: { enabled: true },
     "dedicated-accounts": { enabled: true, tierIndex: 2 },
     "paid-amplification": { enabled: true, budget: 5000 },
+    youtube: {
+      enabled: true,
+      youtubeAdTypes: {
+        0: { enabled: true, budget: 500 },
+        4: { enabled: true, budget: 1000 },
+      },
+    },
   },
 };
 
@@ -58,25 +74,39 @@ function getSelectableTiers(service: Service) {
   );
 }
 
-function calcServiceCost(service: Service, sel: ServiceSelection | undefined): number {
+/* ── Tiered fee calculation for Paid Amplification ── */
+function calcTieredFee(spend: number): number {
+  const first = Math.min(spend, 5000) * 0.3;
+  const second = Math.min(Math.max(spend - 5000, 0), 5000) * 0.2;
+  const third = Math.max(spend - 10000, 0) * 0.1;
+  return first + second + third;
+}
+
+function calcServiceCost(
+  service: Service,
+  sel: ServiceSelection | undefined
+): number {
   if (!sel || !sel.enabled) return 0;
 
-  // Flat-price services
+  // YouTube multi-select: sum of all enabled ad type budgets
+  if (service.multiSelect) {
+    let total = 0;
+    Object.values(sel.youtubeAdTypes).forEach((at) => {
+      if (at.enabled) total += at.budget;
+    });
+    return total;
+  }
+
   if (service.flatPrice) return service.flatPrice;
 
-  // Marketplace: budget-based with category CPM
-  if (service.id === "marketplace" && service.categories) {
-    return sel.budget;
-  }
+  if (service.id === "marketplace") return sel.budget;
 
   if (service.budgetBased) {
     if (service.id === "instagram") return sel.budget;
     if (service.id === "paid-amplification") {
       const creative = 1000;
-      let feeRate = 0.3;
-      if (sel.budget > 10000) feeRate = 0.1;
-      else if (sel.budget > 5000) feeRate = 0.2;
-      return creative + sel.budget + sel.budget * feeRate;
+      const fee = calcTieredFee(sel.budget);
+      return creative + sel.budget + fee;
     }
     return sel.budget;
   }
@@ -102,6 +132,29 @@ const CampaignBuilder = () => {
     []
   );
 
+  const updateYoutubeAdType = useCallback(
+    (adIndex: number, patch: Partial<YouTubeAdType>) =>
+      setSelections((prev) => {
+        const yt = prev.youtube;
+        if (!yt) return prev;
+        const current = yt.youtubeAdTypes[adIndex] ?? {
+          enabled: false,
+          budget: 100,
+        };
+        return {
+          ...prev,
+          youtube: {
+            ...yt,
+            youtubeAdTypes: {
+              ...yt.youtubeAdTypes,
+              [adIndex]: { ...current, ...patch },
+            },
+          },
+        };
+      }),
+    []
+  );
+
   const applyPreset = useCallback((key: string) => {
     setSelections(() => {
       const next: Selections = {};
@@ -120,9 +173,11 @@ const CampaignBuilder = () => {
     let oneTime = 0;
     let monthly = 0;
     services.forEach((s) => {
-      const cost = calcServiceCost(s, selections[s.id]);
+      const sel = selections[s.id];
+      if (!sel) return;
+      const cost = calcServiceCost(s, sel);
       const tiers = getSelectableTiers(s);
-      const tier = tiers[selections[s.id]?.tierIndex];
+      const tier = tiers[sel.tierIndex];
       if (tier?.isMonthly) {
         monthly += cost;
       } else {
@@ -164,9 +219,23 @@ const CampaignBuilder = () => {
       <div className="space-y-3">
         {services.map((service) => {
           const sel = selections[service.id];
+          if (!sel) return null;
           const tiers = getSelectableTiers(service);
           const cost = calcServiceCost(service, sel);
           const isFlat = !!service.flatPrice;
+
+          if (service.multiSelect) {
+            return (
+              <YouTubeRow
+                key={service.id}
+                service={service}
+                sel={sel}
+                cost={cost}
+                onToggle={(enabled) => update(service.id, { enabled })}
+                onUpdateAdType={updateYoutubeAdType}
+              />
+            );
+          }
 
           return (
             <ServiceRow
@@ -184,7 +253,10 @@ const CampaignBuilder = () => {
 
       {/* Sticky total */}
       <div className="sticky bottom-6 z-40">
-        <GlassPanel variant="strong" className="flex items-center justify-between">
+        <GlassPanel
+          variant="strong"
+          className="flex items-center justify-between"
+        >
           <span className="text-sm font-medium text-muted-foreground">
             Estimated Total
           </span>
@@ -204,9 +276,107 @@ const CampaignBuilder = () => {
   );
 };
 
-/* ── Extracted row component ── */
+/* ── YouTube multi-select row ── */
 
-import type { PricingItem } from "@/data/services";
+interface YouTubeRowProps {
+  service: Service;
+  sel: ServiceSelection;
+  cost: number;
+  onToggle: (enabled: boolean) => void;
+  onUpdateAdType: (index: number, patch: Partial<YouTubeAdType>) => void;
+}
+
+function YouTubeRow({
+  service,
+  sel,
+  cost,
+  onToggle,
+  onUpdateAdType,
+}: YouTubeRowProps) {
+  return (
+    <div
+      className={`glass-card rounded-xl px-5 py-4 flex flex-col gap-4 transition-all ${
+        sel.enabled ? "ring-2 ring-primary/30" : "opacity-70"
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Switch checked={sel.enabled} onCheckedChange={onToggle} />
+          <span
+            className={`text-sm font-medium ${
+              sel.enabled ? "text-foreground" : "text-muted-foreground"
+            }`}
+          >
+            {service.title}
+          </span>
+        </div>
+        {sel.enabled && cost > 0 && (
+          <span className="text-sm font-bold text-foreground">
+            ${cost.toLocaleString()}
+          </span>
+        )}
+      </div>
+
+      {sel.enabled && (
+        <div className="space-y-3 pl-10">
+          {service.pricing.map((tier, i) => {
+            const at = sel.youtubeAdTypes[i] ?? {
+              enabled: false,
+              budget: 100,
+            };
+            const cpm = tier.cpmValue ?? 7;
+            const estViews = at.enabled
+              ? Math.round((at.budget / cpm) * 1000)
+              : 0;
+
+            return (
+              <div key={tier.label} className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    checked={at.enabled}
+                    onCheckedChange={(checked) =>
+                      onUpdateAdType(i, { enabled: !!checked })
+                    }
+                  />
+                  <span className="text-xs font-medium text-foreground">
+                    {tier.label}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {tier.price}
+                  </span>
+                </div>
+                {at.enabled && (
+                  <div className="pl-7 space-y-1">
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Budget</span>
+                      <span className="font-medium text-foreground">
+                        ${at.budget.toLocaleString()}
+                      </span>
+                    </div>
+                    <Slider
+                      value={[at.budget]}
+                      onValueChange={([v]) =>
+                        onUpdateAdType(i, { budget: v })
+                      }
+                      min={Math.ceil(cpm)}
+                      max={5000}
+                      step={10}
+                    />
+                    <div className="text-xs text-muted-foreground">
+                      Est. ~{estViews.toLocaleString()} views
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Standard service row ── */
 
 interface ServiceRowProps {
   service: Service;
@@ -217,58 +387,155 @@ interface ServiceRowProps {
   onUpdate: (id: string, patch: Partial<ServiceSelection>) => void;
 }
 
-function ServiceRow({ service, sel, tiers, cost, isFlat, onUpdate }: ServiceRowProps) {
+function ServiceRow({
+  service,
+  sel,
+  tiers,
+  cost,
+  isFlat,
+  onUpdate,
+}: ServiceRowProps) {
   const isMarketplace = service.id === "marketplace";
-  const minBudget = isMarketplace && service.categories
-    ? service.categories[sel.categoryIndex]?.minBudget ?? 2000
-    : 350;
+  const isPaidAmp = service.id === "paid-amplification";
+  const minBudget =
+    isMarketplace && service.categories
+      ? service.categories[sel.categoryIndex]?.minBudget ?? 2000
+      : isPaidAmp
+      ? 500
+      : 350;
+
+  const handleCategoryChange = useCallback(
+    (v: string) => {
+      const newIdx = Number(v);
+      const newMin = service.categories?.[newIdx]?.minBudget ?? 2000;
+      onUpdate(service.id, {
+        categoryIndex: newIdx,
+        budget: Math.max(sel.budget, newMin),
+      });
+    },
+    [service, sel.budget, onUpdate]
+  );
+
+  // Marketplace estimated views
+  const marketplaceViews = useMemo(() => {
+    if (!isMarketplace || !service.categories) return 0;
+    const cat = service.categories[sel.categoryIndex];
+    if (!cat || cat.cpm <= 0) return 0;
+    return Math.round((sel.budget / cat.cpm) * 1000);
+  }, [isMarketplace, service.categories, sel.categoryIndex, sel.budget]);
+
+  // Paid amplification breakdown
+  const paidAmpBreakdown = useMemo(() => {
+    if (!isPaidAmp) return null;
+    const fee = calcTieredFee(sel.budget);
+    return {
+      spend: sel.budget,
+      fee: Math.round(fee),
+      creative: 1000,
+      total: sel.budget + Math.round(fee) + 1000,
+    };
+  }, [isPaidAmp, sel.budget]);
 
   return (
     <div
-      className={`glass-card rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4 transition-all ${
+      className={`glass-card rounded-xl px-5 py-4 flex flex-col gap-4 transition-all ${
         sel.enabled ? "ring-2 ring-primary/30" : "opacity-70"
       }`}
     >
-      {/* Toggle + name */}
-      <div className="flex items-center gap-3 sm:w-56 shrink-0">
-        <Switch
-          checked={sel.enabled}
-          onCheckedChange={(checked) =>
-            onUpdate(service.id, { enabled: checked })
-          }
-        />
-        <span
-          className={`text-sm font-medium ${
-            sel.enabled ? "text-foreground" : "text-muted-foreground"
-          }`}
-        >
-          {service.title}
-        </span>
-      </div>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        {/* Toggle + name */}
+        <div className="flex items-center gap-3 sm:w-56 shrink-0">
+          <Switch
+            checked={sel.enabled}
+            onCheckedChange={(checked) =>
+              onUpdate(service.id, { enabled: checked })
+            }
+          />
+          <span
+            className={`text-sm font-medium ${
+              sel.enabled ? "text-foreground" : "text-muted-foreground"
+            }`}
+          >
+            {service.title}
+          </span>
+        </div>
 
-      {/* Controls */}
-      {sel.enabled && !isFlat && (
-        <div className="flex-1 flex items-center gap-4 flex-wrap">
-          {/* Marketplace: category + budget */}
-          {isMarketplace && service.categories ? (
-            <>
-              <Select
-                value={String(sel.categoryIndex)}
-                onValueChange={(v) =>
-                  onUpdate(service.id, { categoryIndex: Number(v) })
-                }
-              >
-                <SelectTrigger className="w-36 bg-background/50">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {service.categories.map((cat, i) => (
-                    <SelectItem key={cat.label} value={String(i)}>
-                      {cat.label} — ${cat.cpm} CPM
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        {/* Controls */}
+        {sel.enabled && !isFlat && (
+          <div className="flex-1 flex items-center gap-4 flex-wrap">
+            {isMarketplace && service.categories ? (
+              <>
+                <Select
+                  value={String(sel.categoryIndex)}
+                  onValueChange={handleCategoryChange}
+                >
+                  <SelectTrigger className="w-36 bg-background/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {service.categories.map((cat, i) => (
+                      <SelectItem key={cat.label} value={String(i)}>
+                        {cat.label} — ${cat.cpm} CPM
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex-1 min-w-[200px] space-y-1">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Budget</span>
+                    <span className="font-medium text-foreground">
+                      ${sel.budget.toLocaleString()}
+                    </span>
+                  </div>
+                  <Slider
+                    value={[sel.budget]}
+                    onValueChange={([v]) =>
+                      onUpdate(service.id, { budget: v })
+                    }
+                    min={minBudget}
+                    max={30000}
+                    step={500}
+                  />
+                  {marketplaceViews > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      Est. ~{marketplaceViews.toLocaleString()} views
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : isPaidAmp ? (
+              <div className="flex-1 min-w-[200px] space-y-1">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Ad Spend</span>
+                  <span className="font-medium text-foreground">
+                    ${sel.budget.toLocaleString()}
+                  </span>
+                </div>
+                <Slider
+                  value={[sel.budget]}
+                  onValueChange={([v]) =>
+                    onUpdate(service.id, { budget: v })
+                  }
+                  min={minBudget}
+                  max={100000}
+                  step={500}
+                />
+                {paidAmpBreakdown && (
+                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground mt-1">
+                    <span>
+                      Ad Spend: ${paidAmpBreakdown.spend.toLocaleString()}
+                    </span>
+                    <span>
+                      Mgmt Fee: ${paidAmpBreakdown.fee.toLocaleString()}
+                    </span>
+                    <span>Creative: $1,000</span>
+                    <span className="font-medium text-foreground">
+                      Total: ${paidAmpBreakdown.total.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : service.budgetBased ? (
               <div className="flex-1 min-w-[200px] space-y-1">
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Budget</span>
@@ -282,69 +549,60 @@ function ServiceRow({ service, sel, tiers, cost, isFlat, onUpdate }: ServiceRowP
                     onUpdate(service.id, { budget: v })
                   }
                   min={minBudget}
-                  max={50000}
-                  step={500}
+                  max={25000}
+                  step={50}
                 />
               </div>
-            </>
-          ) : service.budgetBased ? (
-            <div className="flex-1 min-w-[200px] space-y-1">
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Budget</span>
-                <span className="font-medium text-foreground">
-                  ${sel.budget.toLocaleString()}
-                </span>
-              </div>
-              <Slider
-                value={[sel.budget]}
-                onValueChange={([v]) =>
-                  onUpdate(service.id, { budget: v })
+            ) : tiers.length > 0 ? (
+              <Select
+                value={String(sel.tierIndex)}
+                onValueChange={(v) =>
+                  onUpdate(service.id, { tierIndex: Number(v) })
                 }
-                min={minBudget}
-                max={25000}
-                step={50}
-              />
-            </div>
-          ) : tiers.length > 0 ? (
-            <Select
-              value={String(sel.tierIndex)}
-              onValueChange={(v) =>
-                onUpdate(service.id, { tierIndex: Number(v) })
-              }
-            >
-              <SelectTrigger className="w-56 bg-background/50">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {tiers.map((tier, i) => (
-                  <SelectItem key={tier.label} value={String(i)}>
-                    {tier.label} — {tier.price}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : null}
-        </div>
-      )}
+              >
+                <SelectTrigger className="w-56 bg-background/50">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {tiers.map((tier, i) => (
+                    <SelectItem key={tier.label} value={String(i)}>
+                      {tier.label} — {tier.price}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : null}
+          </div>
+        )}
 
-      {/* Flat price label */}
-      {sel.enabled && isFlat && (
-        <div className="flex-1">
-          <span className="text-xs text-muted-foreground">Flat rate</span>
-        </div>
-      )}
+        {/* Flat price label */}
+        {sel.enabled && isFlat && (
+          <div className="flex-1">
+            <span className="text-xs text-muted-foreground">Flat rate</span>
+          </div>
+        )}
 
-      {/* Cost */}
-      {sel.enabled && cost > 0 && (
-        <div className="text-right sm:w-28 shrink-0">
-          <span className="text-sm font-bold text-foreground">
-            ${cost.toLocaleString()}
-          </span>
-          {tiers[sel.tierIndex]?.isMonthly && (
-            <span className="text-xs text-muted-foreground">/mo</span>
-          )}
-        </div>
-      )}
+        {/* Cost (non-paid-amp, non-youtube) */}
+        {sel.enabled && cost > 0 && !isPaidAmp && (
+          <div className="text-right sm:w-28 shrink-0">
+            <span className="text-sm font-bold text-foreground">
+              ${cost.toLocaleString()}
+            </span>
+            {tiers[sel.tierIndex]?.isMonthly && (
+              <span className="text-xs text-muted-foreground">/mo</span>
+            )}
+          </div>
+        )}
+
+        {/* Paid amp shows total from breakdown */}
+        {sel.enabled && isPaidAmp && paidAmpBreakdown && (
+          <div className="text-right sm:w-28 shrink-0">
+            <span className="text-sm font-bold text-foreground">
+              ${paidAmpBreakdown.total.toLocaleString()}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
