@@ -37,36 +37,7 @@ const defaultSelection = (): ServiceSelection => ({
   youtubeAdTypes: {},
 });
 
-const presets: Record<string, Record<string, Partial<ServiceSelection>>> = {
-  starter: {
-    spotify: { enabled: true, tierIndex: 0 },
-    soundcloud: { enabled: true, tierIndex: 0 },
-    marketplace: { enabled: true, budget: 2000, categoryIndex: 0 },
-  },
-  momentum: {
-    spotify: { enabled: true, tierIndex: 4 },
-    soundcloud: { enabled: true, tierIndex: 2 },
-    marketplace: { enabled: true, budget: 5000, categoryIndex: 0 },
-    instagram: { enabled: true, budget: 2000 },
-  },
-  "full-release": {
-    spotify: { enabled: true, tierIndex: 9 },
-    soundcloud: { enabled: true, tierIndex: 4 },
-    marketplace: { enabled: true, budget: 10000, categoryIndex: 0 },
-    instagram: { enabled: true, budget: 5000 },
-    "creator-flood": { enabled: true },
-    trending: { enabled: true },
-    "dedicated-accounts": { enabled: true, tierIndex: 2 },
-    "paid-amplification": { enabled: true, budget: 5000 },
-    youtube: {
-      enabled: true,
-      youtubeAdTypes: {
-        0: { enabled: true, budget: 500 },
-        4: { enabled: true, budget: 1000 },
-      },
-    },
-  },
-};
+
 
 function getSelectableTiers(service: Service) {
   return service.pricing.filter(
@@ -155,19 +126,6 @@ const CampaignBuilder = () => {
     []
   );
 
-  const applyPreset = useCallback((key: string) => {
-    setSelections(() => {
-      const next: Selections = {};
-      services.forEach((s) => (next[s.id] = defaultSelection()));
-      const preset = presets[key];
-      if (preset) {
-        Object.entries(preset).forEach(([id, patch]) => {
-          next[id] = { ...next[id], ...patch };
-        });
-      }
-      return next;
-    });
-  }, []);
 
   const { total, monthlyTotal, hasMonthly } = useMemo(() => {
     let oneTime = 0;
@@ -189,32 +147,6 @@ const CampaignBuilder = () => {
 
   return (
     <div className="space-y-8">
-      {/* Presets */}
-      <div className="flex flex-wrap gap-3">
-        {[
-          { key: "starter", label: "Starter", range: "$2K–$5K" },
-          { key: "momentum", label: "Momentum", range: "$10K–$15K" },
-          { key: "full-release", label: "Full Release", range: "$50K+" },
-        ].map((p) => (
-          <button
-            key={p.key}
-            onClick={() => applyPreset(p.key)}
-            className="glass-card rounded-xl px-5 py-3 text-left transition hover:ring-2 hover:ring-primary/40"
-          >
-            <span className="block text-sm font-semibold text-foreground">
-              {p.label}
-            </span>
-            <span className="text-xs text-muted-foreground">{p.range}</span>
-          </button>
-        ))}
-        <button
-          onClick={() => applyPreset("__clear")}
-          className="glass-card rounded-xl px-5 py-3 text-sm text-muted-foreground hover:text-foreground transition"
-        >
-          Clear All
-        </button>
-      </div>
-
       {/* Service rows */}
       <div className="space-y-3">
         {services.map((service) => {
@@ -554,23 +486,30 @@ function ServiceRow({
                 />
               </div>
             ) : tiers.length > 0 ? (
-              <Select
-                value={String(sel.tierIndex)}
-                onValueChange={(v) =>
-                  onUpdate(service.id, { tierIndex: Number(v) })
-                }
-              >
-                <SelectTrigger className="w-56 bg-background/50">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {tiers.map((tier, i) => (
-                    <SelectItem key={tier.label} value={String(i)}>
-                      {tier.label} — {tier.price}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex-1 space-y-1">
+                <Select
+                  value={String(sel.tierIndex)}
+                  onValueChange={(v) =>
+                    onUpdate(service.id, { tierIndex: Number(v) })
+                  }
+                >
+                  <SelectTrigger className="w-56 bg-background/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tiers.map((tier, i) => (
+                      <SelectItem key={tier.label} value={String(i)}>
+                        {tier.label} — {tier.price}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {tiers[sel.tierIndex]?.detail && (
+                  <div className="text-xs text-muted-foreground pl-1">
+                    {tiers[sel.tierIndex].detail}
+                  </div>
+                )}
+              </div>
             ) : null}
           </div>
         )}
