@@ -242,11 +242,6 @@ function YouTubeRow({
             {service.title}
           </span>
         </div>
-        {sel.enabled && cost > 0 && (
-          <span className="text-sm font-bold text-foreground">
-            ${cost.toLocaleString()}
-          </span>
-        )}
       </div>
 
       {sel.enabled && (
@@ -521,26 +516,6 @@ function ServiceRow({
           </div>
         )}
 
-        {/* Cost (non-paid-amp, non-youtube) */}
-        {sel.enabled && cost > 0 && !isPaidAmp && (
-          <div className="text-right sm:w-28 shrink-0">
-            <span className="text-sm font-bold text-foreground">
-              ${cost.toLocaleString()}
-            </span>
-            {tiers[sel.tierIndex]?.isMonthly && (
-              <span className="text-xs text-muted-foreground">/mo</span>
-            )}
-          </div>
-        )}
-
-        {/* Paid amp shows total from breakdown */}
-        {sel.enabled && isPaidAmp && paidAmpBreakdown && (
-          <div className="text-right sm:w-28 shrink-0">
-            <span className="text-sm font-bold text-foreground">
-              ${paidAmpBreakdown.total.toLocaleString()}
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
