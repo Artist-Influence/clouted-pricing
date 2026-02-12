@@ -31,7 +31,7 @@ export const services: Service[] = [
     id: "fan-accounts",
     title: "Fan Accounts",
     description:
-      "Faceless fan accounts managed by trained VAs across TikTok, YouTube Shorts, and Instagram Reels. Each package multiplies unique accounts across all three platforms. The client owns all accounts and content. 3-month minimum commitment.",
+      "Faceless fan accounts managed by trained VAs for music artists across TikTok, YouTube Shorts, and Instagram Reels. Each package multiplies unique accounts across all three platforms. The client owns all accounts and content. 3-month minimum commitment.",
     timeframe: "3-month minimum",
     visualizer: "network",
     pricing: [
@@ -44,7 +44,7 @@ export const services: Service[] = [
     id: "managed-ugc",
     title: "Managed UGC Program",
     description:
-      "Full-service UGC program with vetted creators producing original content across TikTok and Instagram. We handle creator sourcing, briefing, production, and distribution. The client owns all content. 3-month minimum commitment.",
+      "Full-service UGC program with vetted creators producing original content for brands and non-music verticals across TikTok and Instagram. We handle creator sourcing, briefing, production, and distribution. The client owns all content. 3-month minimum commitment.",
     timeframe: "3-month minimum",
     visualizer: "network",
     pricing: [
