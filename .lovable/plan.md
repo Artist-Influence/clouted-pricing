@@ -1,26 +1,35 @@
 
-## Remove Pricing from Select Dropdown Triggers
 
-The user wants to hide the pricing information that appears in the blue trigger area of the Select components. Currently, when you look at each service dropdown, you see pricing like "$13 CPM", "$1,650", etc. displayed in the SelectValue area.
+## Split Dedicated Accounts into Fan Accounts + Managed UGC Program
 
-### Root Cause
-The `SelectValue` component automatically displays the selected item's text content. In the dropdowns, the items contain pricing information (e.g., `{tier.label} — {tier.price}`), so the trigger shows that full text.
+### What Changes
 
-### Solution
-Modify the Select components to use a custom `SelectValue` placeholder instead of letting it auto-display the selected item's text. This way:
-- The trigger will show only a generic placeholder like "Select an option" or service-specific text
-- The pricing will remain visible inside the dropdown menu items themselves
-- This applies to three key Select components:
-  1. **Clipping category selector** (line 399-401)
-  2. **Tier-based service selector** (line 491-493)
+The current single "Dedicated Accounts" service gets replaced by two separate services:
 
-### Implementation Details
+**1. Fan Accounts (Min 3 Months)**
+- $8,000/mo -- 5 Unique Accounts (x3 platforms = 15 total) / 300 Unique Videos (900 Total)
+- $15,000/mo -- 10 Unique Accounts (x3 platforms = 30 total) / 600 Unique Videos (1,200 Total)
+- $21,000/mo -- 15 Unique Accounts (x3 platforms = 45 total) / 900 Unique Videos (1,800 Total)
 
-**Clipping Category Select (line 395-409):**
-- Change `<SelectValue />` to `<SelectValue placeholder="Select Category" />`
+**2. Managed UGC Program (Min 3 Months)**
+- $30,000/mo -- 10 Creators / 1,200 Videos across TikTok, Instagram (600 Unique)
+- $60,000/mo -- 20 Creators / 2,400 Videos across TikTok, Instagram (1,200 Unique)
 
-**Tier-based Service Select (line 485-502):**
-- Change `<SelectValue />` to `<SelectValue placeholder="Select Tier" />`
+Both remain monthly/recurring with a 3-month minimum, and show as tier-select dropdowns in the Campaign Builder (same UX pattern as the old Dedicated Accounts).
 
-The dropdown menu items will retain their pricing information (`{tier.label} — {tier.price}` and `{cat.label} — ${cat.cpm} CPM`), so users will see pricing when they open the dropdown. It just won't be visible in the closed trigger state.
+### Technical Details
+
+**File: `src/data/services.ts`**
+- Remove the existing `dedicated-accounts` service entry
+- Add two new service entries at the top of the array:
+  - `fan-accounts` with 3 tiers ($8K, $15K, $21K), all `isMonthly: true`, with detail strings describing accounts/videos
+  - `managed-ugc` with 2 tiers ($30K, $60K), all `isMonthly: true`, with detail strings describing creators/videos
+- Both keep `timeframe: "3-month minimum"` and `visualizer: "network"`
+
+**File: `src/components/CampaignBuilder.tsx`**
+- No structural changes needed -- both new services use the existing tier-select dropdown pattern (non-budget-based, non-flat, with selectable tiers)
+- The state initializer already handles new service IDs dynamically from the `services` array
+
+**File: `src/components/ServiceAccordion.tsx`**
+- No changes needed -- it renders from the `services` array automatically, and both new services will use the card-based pricing display (not `tableDisplay`)
 
