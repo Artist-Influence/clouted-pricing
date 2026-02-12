@@ -1,80 +1,71 @@
 
 
-# Pricing Data & Display Overhaul
+# Campaign Builder Enhancements
 
-## What's Changing
+## Changes Overview
 
-The entire pricing dataset needs to be corrected, several services need restructuring, and the accordion display should use a compact table format (inside a dropdown) for services with many tiers instead of the current card grid.
+Four targeted improvements to the Campaign Builder section:
 
----
+### 1. Rename "Marketplace Campaigns" to "Clipping"
+- Change `title` in `src/data/services.ts` from "Marketplace Campaigns" to "Clipping"
+- Update description to match the clipping service context
 
-## Updated Service Structure
+### 2. Clipping (Marketplace) -- dynamic min budget + estimated views
+- The category's `minBudget` already drives the slider minimum (Music = $1K, others = $2K) -- this works today but the slider `max` is 50K; change to **$30K**
+- When budget changes, also clamp it to the new category's `minBudget` on category switch
+- Show **estimated views** below the slider: `views = (budget / cpm) * 1000` (since CPM = cost per 1,000 impressions)
+- Display like: "Est. ~2,500,000 views"
 
-### Services to keep (with corrected pricing)
+### 3. Paid Amplification -- slider to $100K + spend/fee breakdown
+- Change slider `max` from 25K to **$100K**, step to $500
+- Show a clear breakdown below the slider:
+  - "Ad Spend: $X" (the slider value)
+  - "Management Fee: $Y" (calculated with tiered rates: 30% on first $5K, 20% on next $5K, 10% on remainder)
+  - "Creative Fee: $1,000"
+  - "Total: $Z"
+- Fix the fee calculation to be **tiered** (not flat rate): first $5K at 30%, $5K-$10K at 20%, $10K+ at 10% -- currently it uses a single flat rate which is incorrect
 
-1. **YouTube Ads** -- same tiers, add minimum info per row (e.g. "1,000 views ($13)")
-2. **Spotify Playlisting** -- expanded from 6 tiers to 17 (10K through 1M Streams with new prices)
-3. **SoundCloud Reposts** -- changed from 500K-10M to 5M-80M reach with new prices
-4. **Instagram Seeding** -- unchanged (70/30 split, $350 min)
+### 4. YouTube -- budget slider + multi-select ad types
+- Change YouTube from a tier-dropdown service to a **multi-select + slider** service
+- Add checkboxes (or toggle chips) for each ad type (USA Traffic, LATAM Traffic, etc.)
+- Add a budget slider per selected ad type, or a single budget slider with the CPM applied per type
+- Show estimated views per selected type: `views = (budget / cpm) * 1000`
+- This requires a new selection model for YouTube since it needs multiple ad types enabled simultaneously
 
-### Services to restructure
-
-5. **Dedicated Accounts** -- replaces both "Fan Page Management" and "Dedicated UGC Accounts". Two sub-types (Fan Accounts for artists, UGC Accounts for brands). New tiers: Basic $15K/mo (9 accounts, 270 posts), Plus $22.5K/mo (15 accounts, 450 posts), Pro $32.5K/mo (24 accounts, 720 posts), Scale $40K/mo (30 accounts, 900 posts). 3-month minimum, client owns everything.
-
-6. **Marketplace Campaigns** -- new service replacing "Clipping". CPM-based, min $2K budget ($1K for music). Categories: Music $2 CPM, Podcast $2, Sports $2, TV/Film $3, Politics $4, Out-of-Scope custom (min $10K).
-
-### Services to simplify (flat pricing)
-
-7. **Creator Flood** -- single flat price: $12K (remove tiered options)
-8. **Top 50 Trending** -- single flat price: $14K (remove per-platform breakdown)
-
-### Add-on service
-
-9. **Paid Amplification (Meta/TikTok Spark Ads)** -- stays as add-on. +$1K creative fee (10 assets, $100 each additional). 30% fee up to $5K, 20% up to $10K, 10% above $10K.
-
-### Services to remove
-- Culture Edits (not in new pricing)
-
----
-
-## Display Changes
-
-### Table format for long tier lists
-For services with many pricing tiers (Spotify with 17 rows, SoundCloud with 7, YouTube with 7), the accordion's expanded view will render a **styled table** instead of a grid of pricing cards. Columns: Package/Service | Price | Minimum (if applicable). This is more scannable and compact.
-
-Services with fewer tiers or special structures (Dedicated Accounts, Marketplace, Instagram) will keep a card-style or descriptive layout.
-
-### Campaign Builder updates
-- Remove Culture Edits row
-- Creator Flood: no tier dropdown needed, just a toggle (flat $12K)
-- Top 50 Trending: no tier dropdown needed, just a toggle (flat $14K)
-- Dedicated Accounts: tier dropdown with 4 options (monthly)
-- Marketplace Campaigns: budget slider with category selector
-- Update all preset configurations to match new pricing
-
----
-
-## Technical Changes
+## Technical Details
 
 ### `src/data/services.ts`
-- Rewrite all service entries with corrected pricing data
-- Add `tableDisplay?: boolean` flag on services that should render as tables
-- Add `minimumDetail?: string` to PricingItem for YouTube's per-row minimums
-- Merge fanpages + ugc-accounts into a single "dedicated-accounts" entry
-- Replace clipping with "marketplace" entry containing category sub-items
-- Simplify creator-flood and trending to single-price entries
-
-### `src/components/ServiceAccordion.tsx`
-- Add conditional rendering: if `service.tableDisplay` is true, render a `<table>` with glass styling instead of the PricingCard grid
-- Table has columns: Package | Price | Minimum (Minimum column only if any tier has minimumDetail)
+- Rename marketplace title to "Clipping"
+- Add `multiSelect?: boolean` flag to Service interface for YouTube
+- Add `cpmValue?: number` to PricingItem for YouTube tiers (e.g., USA = 13, LATAM = 5.6) to calculate views from budget
 
 ### `src/components/CampaignBuilder.tsx`
-- Update service IDs to match new data (dedicated-accounts, marketplace)
-- For flat-price services (creator-flood, trending): show toggle only, no dropdown
-- For marketplace: add a category selector dropdown + budget slider
-- Update preset configurations to reference correct new service IDs and tier indices
-- Update cost calculation logic for new service structures
 
-### `src/components/deck/PricingCard.tsx`
-- No changes needed (still used for non-table services)
+**Data model changes:**
+- Extend `ServiceSelection` with:
+  - `youtubeAdTypes: Record<number, { enabled: boolean; budget: number }>` for multi-ad-type support
 
+**Clipping row:**
+- Change slider max to 30000
+- On category change, clamp budget to new minBudget
+- Show estimated views: `Math.round((budget / cpm) * 1000).toLocaleString()`
+
+**Paid Amplification row:**
+- Slider max to 100000, step 500
+- Fix `calcServiceCost` to use tiered fee calculation:
+  ```
+  fee = min(spend, 5000) * 0.30
+     + min(max(spend - 5000, 0), 5000) * 0.20
+     + max(spend - 10000, 0) * 0.10
+  ```
+- Show itemized breakdown (Ad Spend, Fee, Creative Fee, Total)
+
+**YouTube row:**
+- Render a list of ad type toggles (checkboxes or small switches)
+- Each enabled ad type gets a budget slider (min $13-based on CPM, max $5000, step $10)
+- Show est. views per type
+- Total YouTube cost = sum of all enabled ad type budgets
+- Update `calcServiceCost` to sum across enabled YouTube ad types
+
+**Preset updates:**
+- Update presets to use the new YouTube multi-select model where applicable
