@@ -324,11 +324,14 @@ function ServiceRow({
 }: ServiceRowProps) {
   const isMarketplace = service.id === "marketplace";
   const isPaidAmp = service.id === "paid-amplification";
+  const isInstagram = service.id === "instagram";
   const minBudget =
     isMarketplace && service.categories
       ? service.categories[sel.categoryIndex]?.minBudget ?? 2000
       : isPaidAmp
       ? 500
+      : isInstagram
+      ? 350
       : 350;
 
   const handleCategoryChange = useCallback(
@@ -362,6 +365,14 @@ function ServiceRow({
       total: sel.budget + Math.round(fee) + 1000,
     };
   }, [isPaidAmp, sel.budget]);
+
+  // Instagram seeding breakdown
+  const instagramBreakdown = useMemo(() => {
+    if (!isInstagram) return null;
+    const adSpend = Math.round(sel.budget * 0.7);
+    const serviceFee = Math.round(sel.budget * 0.3);
+    return { adSpend, serviceFee, total: sel.budget };
+  }, [isInstagram, sel.budget]);
 
   return (
     <div
@@ -458,6 +469,37 @@ function ServiceRow({
                     <span>Creative: $1,000</span>
                     <span className="font-medium text-foreground">
                       Total: ${paidAmpBreakdown.total.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : isInstagram ? (
+              <div className="flex-1 min-w-[200px] space-y-1">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Budget</span>
+                  <span className="font-medium text-foreground">
+                    ${sel.budget.toLocaleString()}
+                  </span>
+                </div>
+                <Slider
+                  value={[sel.budget]}
+                  onValueChange={([v]) =>
+                    onUpdate(service.id, { budget: v })
+                  }
+                  min={minBudget}
+                  max={25000}
+                  step={50}
+                />
+                {instagramBreakdown && (
+                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground mt-1">
+                    <span>
+                      Ad Spend (70%): ${instagramBreakdown.adSpend.toLocaleString()}
+                    </span>
+                    <span>
+                      Service Fee (30%): ${instagramBreakdown.serviceFee.toLocaleString()}
+                    </span>
+                    <span className="font-medium text-foreground">
+                      Total: ${instagramBreakdown.total.toLocaleString()}
                     </span>
                   </div>
                 )}
