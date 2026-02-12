@@ -1,74 +1,80 @@
 
 
-# Redesign: Single Scrollable Page with Campaign Builder
+# Pricing Data & Display Overhaul
 
-## Overview
-Transform the current slide deck into a single scrollable page that shows all services with expandable descriptions and pricing, plus an interactive campaign builder at the bottom where users can mix-and-match services with sliders to estimate costs.
+## What's Changing
 
-## Page Structure (top to bottom)
+The entire pricing dataset needs to be corrected, several services need restructuring, and the accordion display should use a compact table format (inside a dropdown) for services with many tiers instead of the current card grid.
 
-### 1. Hero Section
-- Compact version of the current cover: "CLOUTED" title, tagline, and a brief intro paragraph (merged from CoverSlide + HowToUseSlide content)
-- Keep the gradient background and subtle visualizer
+---
 
-### 2. Services Section
-- Section heading: "Our Services"
-- Each service rendered as a collapsible accordion item using the existing Radix accordion component
-- **Collapsed state**: Service title, a short tagline, timeframe badge, and a "featured" price or price range
-- **Expanded state**: Full description, all pricing cards in a responsive grid, minimum/timeframe/notes
-- Keep the glassmorphism card styling for each service row
+## Updated Service Structure
 
-### 3. Campaign Builder Section
-- Section heading: "Build Your Campaign"
-- For each service, show a row with:
-  - Service name
-  - A toggle (switch) to include/exclude it
-  - When enabled, a dropdown or slider to pick the tier/quantity
-- Running total displayed in a sticky glass panel at the bottom of the viewport
-- The total updates live as users adjust selections
-- Show the example campaign tiers (Starter/Momentum/Full Release) as quick-select presets above the builder
+### Services to keep (with corrected pricing)
 
-### 4. Closing / CTA Section
-- Compact version of ClosingSlide: headline + subline + branding
+1. **YouTube Ads** -- same tiers, add minimum info per row (e.g. "1,000 views ($13)")
+2. **Spotify Playlisting** -- expanded from 6 tiers to 17 (10K through 1M Streams with new prices)
+3. **SoundCloud Reposts** -- changed from 500K-10M to 5M-80M reach with new prices
+4. **Instagram Seeding** -- unchanged (70/30 split, $350 min)
 
-## Technical Details
+### Services to restructure
 
-### Files to Modify
-- **`src/pages/Index.tsx`** -- Complete rewrite: remove slide engine, replace with a single scrollable layout containing the hero, accordion services list, campaign builder, and closing CTA
-- **`src/index.css`** -- Remove slide-specific animations (slide-enter stagger classes), keep glass utilities. Add smooth scroll behavior
+5. **Dedicated Accounts** -- replaces both "Fan Page Management" and "Dedicated UGC Accounts". Two sub-types (Fan Accounts for artists, UGC Accounts for brands). New tiers: Basic $15K/mo (9 accounts, 270 posts), Plus $22.5K/mo (15 accounts, 450 posts), Pro $32.5K/mo (24 accounts, 720 posts), Scale $40K/mo (30 accounts, 900 posts). 3-month minimum, client owns everything.
 
-### New Components to Create
-- **`src/components/ServiceAccordion.tsx`** -- Accordion-based service listing using Radix `Accordion`. Each item shows title + summary when collapsed, full description + pricing grid when expanded
-- **`src/components/CampaignBuilder.tsx`** -- Interactive builder section. For each service: a switch to enable, a select/slider to choose tier. Computes and displays running total. Includes preset buttons for Starter/Momentum/Full Release campaigns
+6. **Marketplace Campaigns** -- new service replacing "Clipping". CPM-based, min $2K budget ($1K for music). Categories: Music $2 CPM, Podcast $2, Sports $2, TV/Film $3, Politics $4, Out-of-Scope custom (min $10K).
 
-### Files to Remove (no longer needed)
-- `src/components/deck/CoverSlide.tsx`
-- `src/components/deck/HowToUseSlide.tsx`
-- `src/components/deck/GoalSelectorSlide.tsx`
-- `src/components/deck/ServiceSlide.tsx`
-- `src/components/deck/CampaignBuildsSlide.tsx`
-- `src/components/deck/ClosingSlide.tsx`
-- `src/components/deck/Visualizer.tsx`
+### Services to simplify (flat pricing)
 
-### Kept As-Is
-- `src/data/services.ts` -- service data stays the same, will add numeric price values for builder calculations
-- `src/components/deck/GlassPanel.tsx` -- reusable, keep it
-- `src/components/deck/PricingCard.tsx` -- reusable inside accordion, keep it
+7. **Creator Flood** -- single flat price: $12K (remove tiered options)
+8. **Top 50 Trending** -- single flat price: $14K (remove per-platform breakdown)
 
-### Data Update: `src/data/services.ts`
-- Add a `numericPrice` (number) field to each `PricingItem` so the campaign builder can calculate totals (e.g., `{ label: "10K Streams", price: "$350", numericPrice: 350 }`)
-- For percentage-based pricing (Instagram Seeding, Paid Amplification), the builder will use a budget input slider instead of tier selection
+### Add-on service
 
-### Campaign Builder Logic
-- Services with fixed tiers (Spotify, SoundCloud, Clipping, etc.): user picks a tier from a dropdown, price is the tier's `numericPrice`
-- Services with percentage pricing (Instagram Seeding, Paid Amplification): user enters a budget amount via slider, fee is calculated automatically
-- Monthly services (Fan Pages, UGC Accounts): user picks a tier, price shown as "/mo"
-- Preset campaigns auto-select specific services and tiers matching the existing Starter/Momentum/Full Release examples
+9. **Paid Amplification (Meta/TikTok Spark Ads)** -- stays as add-on. +$1K creative fee (10 assets, $100 each additional). 30% fee up to $5K, 20% up to $10K, 10% above $10K.
 
-### Existing UI Components Used
-- `@radix-ui/react-accordion` for service dropdowns
-- `@radix-ui/react-switch` for enable/disable toggles
-- `@radix-ui/react-select` for tier selection
-- `@radix-ui/react-slider` for budget sliders
-- Existing glass CSS classes for styling
+### Services to remove
+- Culture Edits (not in new pricing)
+
+---
+
+## Display Changes
+
+### Table format for long tier lists
+For services with many pricing tiers (Spotify with 17 rows, SoundCloud with 7, YouTube with 7), the accordion's expanded view will render a **styled table** instead of a grid of pricing cards. Columns: Package/Service | Price | Minimum (if applicable). This is more scannable and compact.
+
+Services with fewer tiers or special structures (Dedicated Accounts, Marketplace, Instagram) will keep a card-style or descriptive layout.
+
+### Campaign Builder updates
+- Remove Culture Edits row
+- Creator Flood: no tier dropdown needed, just a toggle (flat $12K)
+- Top 50 Trending: no tier dropdown needed, just a toggle (flat $14K)
+- Dedicated Accounts: tier dropdown with 4 options (monthly)
+- Marketplace Campaigns: budget slider with category selector
+- Update all preset configurations to match new pricing
+
+---
+
+## Technical Changes
+
+### `src/data/services.ts`
+- Rewrite all service entries with corrected pricing data
+- Add `tableDisplay?: boolean` flag on services that should render as tables
+- Add `minimumDetail?: string` to PricingItem for YouTube's per-row minimums
+- Merge fanpages + ugc-accounts into a single "dedicated-accounts" entry
+- Replace clipping with "marketplace" entry containing category sub-items
+- Simplify creator-flood and trending to single-price entries
+
+### `src/components/ServiceAccordion.tsx`
+- Add conditional rendering: if `service.tableDisplay` is true, render a `<table>` with glass styling instead of the PricingCard grid
+- Table has columns: Package | Price | Minimum (Minimum column only if any tier has minimumDetail)
+
+### `src/components/CampaignBuilder.tsx`
+- Update service IDs to match new data (dedicated-accounts, marketplace)
+- For flat-price services (creator-flood, trending): show toggle only, no dropdown
+- For marketplace: add a category selector dropdown + budget slider
+- Update preset configurations to reference correct new service IDs and tier indices
+- Update cost calculation logic for new service structures
+
+### `src/components/deck/PricingCard.tsx`
+- No changes needed (still used for non-table services)
 
