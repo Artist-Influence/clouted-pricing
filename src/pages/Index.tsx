@@ -1,12 +1,14 @@
 import ServiceAccordion from "@/components/ServiceAccordion";
 import CampaignBuilder from "@/components/CampaignBuilder";
+import GeometricGrid from "@/components/GeometricGrid";
 import cloutedLogo from "@/assets/clouted-logo.png";
 
 const Index = () => {
   return (
-    <div className="min-h-screen deck-bg">
+    <div className="min-h-screen deck-bg relative">
+      <GeometricGrid />
       {/* Hero */}
-      <header className="pt-20 pb-16 px-6 text-center max-w-3xl mx-auto">
+      <header className="relative z-10 pt-20 pb-16 px-6 text-center max-w-3xl mx-auto">
         <img src={cloutedLogo} alt="CLOUTED" className="h-14 sm:h-16 mx-auto mb-4" />
         
         <p className="text-lg text-muted-foreground font-medium mb-2">
@@ -20,13 +22,13 @@ const Index = () => {
       </header>
 
       {/* Services */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-20">
+      <section className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pb-20">
         <h2 className="text-2xl font-bold text-foreground mb-6">Our Services</h2>
         <ServiceAccordion />
       </section>
 
       {/* Campaign Builder */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-20">
+      <section className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pb-20">
         <h2 className="text-2xl font-bold text-foreground mb-2">
           Build Your Campaign
         </h2>
@@ -38,7 +40,7 @@ const Index = () => {
       </section>
 
       {/* Closing */}
-      <footer className="py-16 px-6 text-center">
+      <footer className="relative z-10 py-16 px-6 text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">
           Build the right system for your next release.
         </h2>
