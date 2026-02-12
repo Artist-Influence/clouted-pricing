@@ -1,85 +1,54 @@
-import { useState, useEffect, useCallback } from "react";
-import CoverSlide from "@/components/deck/CoverSlide";
-import HowToUseSlide from "@/components/deck/HowToUseSlide";
-import GoalSelectorSlide from "@/components/deck/GoalSelectorSlide";
-import ServiceSlide from "@/components/deck/ServiceSlide";
-import CampaignBuildsSlide from "@/components/deck/CampaignBuildsSlide";
-import ClosingSlide from "@/components/deck/ClosingSlide";
-import { services } from "@/data/services";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
-const slides = [
-  <CoverSlide key="cover" />,
-  <HowToUseSlide key="how" />,
-  <GoalSelectorSlide key="goals" />,
-  ...services.map((s) => <ServiceSlide key={s.id} service={s} />),
-  <CampaignBuildsSlide key="campaigns" />,
-  <ClosingSlide key="closing" />,
-];
+import ServiceAccordion from "@/components/ServiceAccordion";
+import CampaignBuilder from "@/components/CampaignBuilder";
 
 const Index = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = slides.length;
-
-  const goNext = useCallback(() => {
-    setCurrentSlide((prev) => Math.min(prev + 1, totalSlides - 1));
-  }, [totalSlides]);
-
-  const goPrev = useCallback(() => {
-    setCurrentSlide((prev) => Math.max(prev - 1, 0));
-  }, []);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === " ") {
-        e.preventDefault();
-        goNext();
-      }
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        goPrev();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goNext, goPrev]);
-
   return (
-    <div className="h-screen w-screen overflow-hidden deck-bg relative select-none">
-      <div className="h-full w-full slide-enter" key={currentSlide}>
-        {slides[currentSlide]}
-      </div>
+    <div className="min-h-screen deck-bg">
+      {/* Hero */}
+      <header className="pt-20 pb-16 px-6 text-center max-w-3xl mx-auto">
+        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-foreground mb-4">
+          CLOUTED
+        </h1>
+        <p className="text-lg text-muted-foreground font-medium mb-2">
+          Services & Campaign Builder
+        </p>
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto">
+          Every release has different goals. Browse our services below, then use
+          the campaign builder to mix and match into a custom growth plan scaled
+          to your budget.
+        </p>
+      </header>
 
-      {/* Navigation pill */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 glass-strong rounded-full px-5 py-2.5 z-50">
-        <button
-          onClick={goPrev}
-          disabled={currentSlide === 0}
-          className="text-foreground/60 hover:text-foreground disabled:opacity-20 transition p-1"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        <span className="text-xs font-medium text-muted-foreground tabular-nums min-w-[3rem] text-center">
-          {currentSlide + 1} / {totalSlides}
-        </span>
-        <button
-          onClick={goNext}
-          disabled={currentSlide === totalSlides - 1}
-          className="text-foreground/60 hover:text-foreground disabled:opacity-20 transition p-1"
-          aria-label="Next slide"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+      {/* Services */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-20">
+        <h2 className="text-2xl font-bold text-foreground mb-6">Our Services</h2>
+        <ServiceAccordion />
+      </section>
 
-      {/* Progress bar */}
-      <div className="fixed top-0 left-0 right-0 h-0.5 z-50">
-        <div
-          className="h-full bg-primary/40 transition-all duration-300 ease-out"
-          style={{ width: `${((currentSlide + 1) / totalSlides) * 100}%` }}
-        />
-      </div>
+      {/* Campaign Builder */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-20">
+        <h2 className="text-2xl font-bold text-foreground mb-2">
+          Build Your Campaign
+        </h2>
+        <p className="text-sm text-muted-foreground mb-8">
+          Toggle services on, pick a tier or set a budget, and watch your
+          estimate update live. Or start with a preset.
+        </p>
+        <CampaignBuilder />
+      </section>
+
+      {/* Closing */}
+      <footer className="py-16 px-6 text-center">
+        <h2 className="text-2xl font-bold text-foreground mb-2">
+          Build the right system for your next release.
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          We can recommend a campaign structure within 24 hours.
+        </p>
+        <p className="text-xs text-muted-foreground/50 mt-8">
+          CLOUTED · Confidential
+        </p>
+      </footer>
     </div>
   );
 };
