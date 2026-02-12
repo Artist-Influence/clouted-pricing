@@ -28,18 +28,28 @@ export interface Service {
 
 export const services: Service[] = [
   {
-    id: "dedicated-accounts",
-    title: "Dedicated Accounts",
+    id: "fan-accounts",
+    title: "Fan Accounts",
     description:
-      "Dedicated accounts on fresh profiles provide a long-term approach to building communities through owned social assets. Fan Accounts (faceless, VA-managed) serve artists, while UGC Accounts (actor-driven, vetted creators) serve brands. All packages include a 3-month minimum commitment, and the client owns all accounts and content.",
+      "Faceless fan accounts managed by trained VAs across TikTok, YouTube Shorts, and Instagram Reels. Each package multiplies unique accounts across all three platforms. The client owns all accounts and content. 3-month minimum commitment.",
     timeframe: "3-month minimum",
     visualizer: "network",
-    note: "Two sub-types: Fan Accounts (faceless; for artists) managed by VAs, and UGC Accounts (actor-driven; for brands) managed by vetted creators.",
     pricing: [
-      { label: "Basic", price: "$15,000/mo", detail: "9 total accounts (3 per platform) | 270 posts", numericPrice: 15000, isMonthly: true },
-      { label: "Plus", price: "$22,500/mo", detail: "15 total accounts (5 per platform) | 450 posts", numericPrice: 22500, isMonthly: true },
-      { label: "Pro", price: "$32,500/mo", detail: "24 total accounts (8 per platform) | 720 posts", featured: true, numericPrice: 32500, isMonthly: true },
-      { label: "Scale", price: "$40,000/mo", detail: "30 total accounts (10 per platform) | 900 posts", numericPrice: 40000, isMonthly: true },
+      { label: "$8K", price: "$8,000/mo", detail: "5 unique accounts (15 total) · 300 unique videos (900 total)", numericPrice: 8000, isMonthly: true },
+      { label: "$15K", price: "$15,000/mo", detail: "10 unique accounts (30 total) · 600 unique videos (1,200 total)", featured: true, numericPrice: 15000, isMonthly: true },
+      { label: "$21K", price: "$21,000/mo", detail: "15 unique accounts (45 total) · 900 unique videos (1,800 total)", numericPrice: 21000, isMonthly: true },
+    ],
+  },
+  {
+    id: "managed-ugc",
+    title: "Managed UGC Program",
+    description:
+      "Full-service UGC program with vetted creators producing original content across TikTok and Instagram. We handle creator sourcing, briefing, production, and distribution. The client owns all content. 3-month minimum commitment.",
+    timeframe: "3-month minimum",
+    visualizer: "network",
+    pricing: [
+      { label: "$30K", price: "$30,000/mo", detail: "10 creators · 1,200 videos (600 unique) across TikTok & Instagram", numericPrice: 30000, isMonthly: true },
+      { label: "$60K", price: "$60,000/mo", detail: "20 creators · 2,400 videos (1,200 unique) across TikTok & Instagram", featured: true, numericPrice: 60000, isMonthly: true },
     ],
   },
   {
