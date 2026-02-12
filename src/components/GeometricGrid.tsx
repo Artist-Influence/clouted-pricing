@@ -25,9 +25,9 @@ const GeometricGrid = () => {
     resize();
     window.addEventListener("resize", resize);
 
-    const CELL = 80;
-    const LINE_ALPHA = 0.06;
-    const GLOW_COUNT = 8;
+    const CELL = 40;
+    const LINE_ALPHA = 0.12;
+    const GLOW_COUNT = 14;
 
     // Persistent glow nodes that drift slowly
     const glows = Array.from({ length: GLOW_COUNT }, () => ({
