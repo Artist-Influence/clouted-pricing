@@ -401,7 +401,7 @@ function ServiceRow({
                   </SelectTrigger>
                   <SelectContent>
                     {service.categories.map((cat, i) => (
-                      <SelectItem key={cat.label} value={String(i)}>
+                      <SelectItem key={cat.label} value={String(i)} textValue={cat.label}>
                         {cat.label} — ${cat.cpm} CPM
                       </SelectItem>
                     ))}
@@ -493,7 +493,7 @@ function ServiceRow({
                   </SelectTrigger>
                   <SelectContent>
                     {tiers.map((tier, i) => (
-                      <SelectItem key={tier.label} value={String(i)}>
+                      <SelectItem key={tier.label} value={String(i)} textValue={tier.label}>
                         {tier.label} — {tier.price}
                       </SelectItem>
                     ))}
