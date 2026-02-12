@@ -112,7 +112,7 @@ const CampaignBuilder = () => {
         if (!yt) return prev;
         const current = yt.youtubeAdTypes[adIndex] ?? {
           enabled: false,
-          budget: 100,
+          budget: 0,
         };
         return {
           ...prev,
@@ -251,10 +251,10 @@ function YouTubeRow({
           {service.pricing.map((tier, i) => {
             const at = sel.youtubeAdTypes[i] ?? {
               enabled: false,
-              budget: 100,
+              budget: 0,
             };
             const cpm = tier.cpmValue ?? 7;
-            const estViews = at.enabled
+            const views = at.enabled
               ? Math.round((at.budget / cpm) * 1000)
               : 0;
 
@@ -263,9 +263,10 @@ function YouTubeRow({
                 <div className="flex items-center gap-3">
                   <Checkbox
                     checked={at.enabled}
-                    onCheckedChange={(checked) =>
-                      onUpdateAdType(i, { enabled: !!checked })
-                    }
+                    onCheckedChange={(checked) => {
+                      const defaultBudget = checked ? (10000 * cpm) / 1000 : 0;
+                      onUpdateAdType(i, { enabled: !!checked, budget: defaultBudget });
+                    }}
                   />
                   <span className="text-xs font-medium text-foreground">
                     {tier.label}
@@ -277,22 +278,22 @@ function YouTubeRow({
                 {at.enabled && (
                   <div className="pl-7 space-y-1">
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Budget</span>
+                      <span>Views</span>
                       <span className="font-medium text-foreground">
-                        ${at.budget.toLocaleString()}
+                        {views.toLocaleString()} views
                       </span>
                     </div>
                     <Slider
-                      value={[at.budget]}
+                      value={[views]}
                       onValueChange={([v]) =>
-                        onUpdateAdType(i, { budget: v })
+                        onUpdateAdType(i, { budget: (v * cpm) / 1000 })
                       }
-                      min={Math.ceil(cpm)}
-                      max={5000}
-                      step={10}
+                      min={10000}
+                      max={10000000}
+                      step={10000}
                     />
                     <div className="text-xs text-muted-foreground">
-                      Est. ~{estViews.toLocaleString()} views
+                      Est. cost: ${at.budget.toLocaleString()}
                     </div>
                   </div>
                 )}
