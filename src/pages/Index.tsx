@@ -1,12 +1,12 @@
 import ServiceAccordion from "@/components/ServiceAccordion";
 import CampaignBuilder from "@/components/CampaignBuilder";
-import GeometricGrid from "@/components/GeometricGrid";
+import AuroraBackground from "@/components/AuroraBackground";
 import cloutedLogo from "@/assets/clouted-logo.png";
 
 const Index = () => {
   return (
     <div className="min-h-screen deck-bg relative">
-      <GeometricGrid />
+      <AuroraBackground />
       {/* Hero */}
       <header className="relative z-10 pt-20 pb-16 px-6 text-center max-w-3xl mx-auto">
         <img src={cloutedLogo} alt="CLOUTED" className="h-14 sm:h-16 mx-auto mb-4" />
