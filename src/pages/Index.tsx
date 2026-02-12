@@ -1,14 +1,14 @@
 import ServiceAccordion from "@/components/ServiceAccordion";
 import CampaignBuilder from "@/components/CampaignBuilder";
+import cloutedLogo from "@/assets/clouted-logo.png";
 
 const Index = () => {
   return (
     <div className="min-h-screen deck-bg">
       {/* Hero */}
       <header className="pt-20 pb-16 px-6 text-center max-w-3xl mx-auto">
-        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-foreground mb-4">
-          CLOUTED
-        </h1>
+        <img src={cloutedLogo} alt="CLOUTED" className="h-14 sm:h-16 mx-auto mb-4" />
+        
         <p className="text-lg text-muted-foreground font-medium mb-2">
           Services & Campaign Builder
         </p>
