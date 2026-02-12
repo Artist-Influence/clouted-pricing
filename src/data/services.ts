@@ -7,6 +7,7 @@ export interface PricingItem {
   isPercentage?: boolean;
   isMonthly?: boolean;
   minimumDetail?: string;
+  cpmValue?: number;
 }
 
 export interface Service {
@@ -21,6 +22,7 @@ export interface Service {
   budgetBased?: boolean;
   tableDisplay?: boolean;
   flatPrice?: number;
+  multiSelect?: boolean;
   categories?: { label: string; cpm: number; cost: number; minBudget: number }[];
 }
 
@@ -34,14 +36,15 @@ export const services: Service[] = [
     minimum: "1,000 views",
     visualizer: "growth",
     tableDisplay: true,
+    multiSelect: true,
     pricing: [
-      { label: "USA Website Traffic", price: "$13 CPM", numericPrice: 1300, minimumDetail: "1,000 views ($13)" },
-      { label: "LATAM Website Traffic", price: "$5.60 CPM", numericPrice: 560, minimumDetail: "1,000 views ($5.60)" },
-      { label: "EUR/AUS Website Traffic", price: "$12 CPM", numericPrice: 1200, minimumDetail: "1,000 views ($12)" },
-      { label: "Asia Website Traffic", price: "$5 CPM", numericPrice: 500, minimumDetail: "1,000 views ($5)" },
-      { label: "Worldwide Website", price: "$7–$2 CPM", detail: "Volume-based pricing", numericPrice: 700, minimumDetail: "1,000 views ($7)" },
-      { label: "Worldwide Skippable", price: "$7–$2.40 CPM", detail: "Volume-based pricing", numericPrice: 700, minimumDetail: "1,000 views ($7)" },
-      { label: "Worldwide Display", price: "$7 CPM", numericPrice: 700, minimumDetail: "1,000 views ($7)" },
+      { label: "USA Website Traffic", price: "$13 CPM", numericPrice: 13, cpmValue: 13, minimumDetail: "1,000 views ($13)" },
+      { label: "LATAM Website Traffic", price: "$5.60 CPM", numericPrice: 5.6, cpmValue: 5.6, minimumDetail: "1,000 views ($5.60)" },
+      { label: "EUR/AUS Website Traffic", price: "$12 CPM", numericPrice: 12, cpmValue: 12, minimumDetail: "1,000 views ($12)" },
+      { label: "Asia Website Traffic", price: "$5 CPM", numericPrice: 5, cpmValue: 5, minimumDetail: "1,000 views ($5)" },
+      { label: "Worldwide Website", price: "$7–$2 CPM", detail: "Volume-based pricing", numericPrice: 7, cpmValue: 7, minimumDetail: "1,000 views ($7)" },
+      { label: "Worldwide Skippable", price: "$7–$2.40 CPM", detail: "Volume-based pricing", numericPrice: 7, cpmValue: 7, minimumDetail: "1,000 views ($7)" },
+      { label: "Worldwide Display", price: "$7 CPM", numericPrice: 7, cpmValue: 7, minimumDetail: "1,000 views ($7)" },
     ],
   },
   {
@@ -119,7 +122,7 @@ export const services: Service[] = [
   },
   {
     id: "marketplace",
-    title: "Marketplace Campaigns",
+    title: "Clipping",
     description:
       "CPM-based campaigns across verticals. Any user can run campaigns with a minimum $2K budget ($1K for music). We handle creator sourcing, content production, and distribution across the relevant platforms.",
     visualizer: "chart",
