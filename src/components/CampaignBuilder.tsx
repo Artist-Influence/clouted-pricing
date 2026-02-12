@@ -234,17 +234,22 @@ function YouTubeRow({
       }`}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Switch checked={sel.enabled} onCheckedChange={onToggle} />
-          <span
-            className={`text-sm font-medium ${
-              sel.enabled ? "text-foreground" : "text-muted-foreground"
-            }`}
-          >
-            {service.title}
-          </span>
-        </div>
-      </div>
+         <div className="flex items-center gap-3">
+           <Switch checked={sel.enabled} onCheckedChange={onToggle} />
+           <div className="flex items-center gap-2">
+             <span
+               className={`text-sm font-medium ${
+                 sel.enabled ? "text-foreground" : "text-muted-foreground"
+               }`}
+             >
+               {service.title}
+             </span>
+             {service.id === "fan-accounts" && (
+               <Badge variant="outline" className="text-xs">For Music</Badge>
+             )}
+           </div>
+         </div>
+       </div>
 
       {sel.enabled && (
         <div className="space-y-3 pl-10">
@@ -386,22 +391,30 @@ function ServiceRow({
       }`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        {/* Toggle + name */}
-        <div className="flex items-center gap-3 sm:w-56 shrink-0">
-          <Switch
-            checked={sel.enabled}
-            onCheckedChange={(checked) =>
-              onUpdate(service.id, { enabled: checked })
-            }
-          />
-          <span
-            className={`text-sm font-medium ${
-              sel.enabled ? "text-foreground" : "text-muted-foreground"
-            }`}
-          >
-            {service.title}
-          </span>
-        </div>
+         {/* Toggle + name */}
+         <div className="flex items-center gap-3 sm:w-56 shrink-0">
+           <Switch
+             checked={sel.enabled}
+             onCheckedChange={(checked) =>
+               onUpdate(service.id, { enabled: checked })
+             }
+           />
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-sm font-medium ${
+                  sel.enabled ? "text-foreground" : "text-muted-foreground"
+                }`}
+              >
+                {service.title}
+              </span>
+              {service.id === "fan-accounts" && (
+                <Badge variant="outline" className="text-xs">For Music</Badge>
+              )}
+              {service.id === "managed-ugc" && (
+                <Badge variant="outline" className="text-xs">For Brands & Other Niches</Badge>
+              )}
+            </div>
+         </div>
 
         {/* Controls */}
         {sel.enabled && !isFlat && (
