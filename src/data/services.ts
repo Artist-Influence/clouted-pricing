@@ -6,6 +6,7 @@ export interface PricingItem {
   numericPrice?: number;
   isPercentage?: boolean;
   isMonthly?: boolean;
+  minimumDetail?: string;
 }
 
 export interface Service {
@@ -18,6 +19,9 @@ export interface Service {
   visualizer: string;
   note?: string;
   budgetBased?: boolean;
+  tableDisplay?: boolean;
+  flatPrice?: number;
+  categories?: { label: string; cpm: number; cost: number; minBudget: number }[];
 }
 
 export const services: Service[] = [
@@ -29,14 +33,15 @@ export const services: Service[] = [
     timeframe: "1–3 weeks",
     minimum: "1,000 views",
     visualizer: "growth",
+    tableDisplay: true,
     pricing: [
-      { label: "USA Website Traffic", price: "$13 CPM", numericPrice: 1300 },
-      { label: "LATAM Website Traffic", price: "$5.60 CPM", numericPrice: 560 },
-      { label: "EUR/AUS Website Traffic", price: "$12 CPM", numericPrice: 1200 },
-      { label: "Asia Website Traffic", price: "$5 CPM", numericPrice: 500 },
-      { label: "Worldwide Website", price: "$7–$2 CPM", detail: "Volume-based pricing", numericPrice: 700 },
-      { label: "Worldwide Skippable", price: "$7–$2.40 CPM", detail: "Volume-based pricing", numericPrice: 700 },
-      { label: "Worldwide Display", price: "$7 CPM", numericPrice: 700 },
+      { label: "USA Website Traffic", price: "$13 CPM", numericPrice: 1300, minimumDetail: "1,000 views ($13)" },
+      { label: "LATAM Website Traffic", price: "$5.60 CPM", numericPrice: 560, minimumDetail: "1,000 views ($5.60)" },
+      { label: "EUR/AUS Website Traffic", price: "$12 CPM", numericPrice: 1200, minimumDetail: "1,000 views ($12)" },
+      { label: "Asia Website Traffic", price: "$5 CPM", numericPrice: 500, minimumDetail: "1,000 views ($5)" },
+      { label: "Worldwide Website", price: "$7–$2 CPM", detail: "Volume-based pricing", numericPrice: 700, minimumDetail: "1,000 views ($7)" },
+      { label: "Worldwide Skippable", price: "$7–$2.40 CPM", detail: "Volume-based pricing", numericPrice: 700, minimumDetail: "1,000 views ($7)" },
+      { label: "Worldwide Display", price: "$7 CPM", numericPrice: 700, minimumDetail: "1,000 views ($7)" },
     ],
   },
   {
@@ -46,13 +51,25 @@ export const services: Service[] = [
       "We run fully organic Spotify campaigns that place your music on third-party playlists curated for your genre, helping you reach real listeners—not bots—and trigger Spotify's algorithm. Each campaign is designed for maximum discovery, often resulting in Discover Weekly or Radio placements, with strong performance in both U.S. and global markets. Stream goals are guaranteed, and every campaign includes weekly reporting, performance tracking, and strategic playlist placement to boost saves, followers, and engagement.",
     timeframe: "90 days",
     visualizer: "growth",
+    tableDisplay: true,
     pricing: [
-      { label: "10K Streams", price: "$350", numericPrice: 350 },
-      { label: "25K Streams", price: "$700", numericPrice: 700 },
-      { label: "50K Streams", price: "$1,200", featured: true, numericPrice: 1200 },
-      { label: "100K Streams", price: "$2,000", featured: true, numericPrice: 2000 },
-      { label: "250K Streams", price: "$4,500", numericPrice: 4500 },
+      { label: "10K Streams", price: "$200", numericPrice: 200 },
+      { label: "20K Streams", price: "$370", numericPrice: 370 },
+      { label: "30K Streams", price: "$540", numericPrice: 540 },
+      { label: "40K Streams", price: "$700", numericPrice: 700 },
+      { label: "50K Streams", price: "$850", numericPrice: 850 },
+      { label: "60K Streams", price: "$1,000", numericPrice: 1000 },
+      { label: "70K Streams", price: "$1,190", numericPrice: 1190 },
+      { label: "80K Streams", price: "$1,360", numericPrice: 1360 },
+      { label: "90K Streams", price: "$1,530", numericPrice: 1530 },
+      { label: "100K Streams", price: "$1,650", featured: true, numericPrice: 1650 },
+      { label: "125K Streams", price: "$2,062", numericPrice: 2062 },
+      { label: "150K Streams", price: "$2,400", numericPrice: 2400 },
+      { label: "200K Streams", price: "$3,200", numericPrice: 3200 },
+      { label: "250K Streams", price: "$4,000", numericPrice: 4000 },
       { label: "500K Streams", price: "$8,000", numericPrice: 8000 },
+      { label: "750K Streams", price: "$12,000", numericPrice: 12000 },
+      { label: "1M Streams", price: "$15,000", numericPrice: 15000 },
     ],
   },
   {
@@ -61,12 +78,15 @@ export const services: Service[] = [
     description:
       "We tap into an underground network of verified SoundCloud artists and labels to organically repost your track across genre-specific communities. With over 50 million active U.S.-based listeners reached through our repost groups, this service connects your music with passionate fans who actively seek new sounds. Campaigns are fully transparent, trackable, and optimized to foster genuine fan engagement rather than passive plays.",
     visualizer: "network",
+    tableDisplay: true,
     pricing: [
-      { label: "500K Reach", price: "$300", numericPrice: 300 },
-      { label: "1M Reach", price: "$500", numericPrice: 500 },
-      { label: "2.5M Reach", price: "$1,000", featured: true, numericPrice: 1000 },
-      { label: "5M Reach", price: "$1,800", numericPrice: 1800 },
-      { label: "10M Reach", price: "$3,000", numericPrice: 3000 },
+      { label: "5M Reach", price: "$150", numericPrice: 150 },
+      { label: "10M Reach", price: "$300", numericPrice: 300 },
+      { label: "20M Reach", price: "$600", numericPrice: 600 },
+      { label: "30M Reach", price: "$850", featured: true, numericPrice: 850 },
+      { label: "40M Reach", price: "$1,175", numericPrice: 1175 },
+      { label: "60M Reach", price: "$1,750", numericPrice: 1750 },
+      { label: "80M Reach", price: "$2,250", numericPrice: 2250 },
     ],
   },
   {
@@ -83,58 +103,43 @@ export const services: Service[] = [
     minimum: "$350 budget",
   },
   {
-    id: "clipping",
-    title: "Clipping",
+    id: "dedicated-accounts",
+    title: "Dedicated Accounts",
     description:
-      "This service is our curated video ad network powered by 10,000+ clippers who produce native-style TikToks, Reels, and Shorts using your track. Campaigns launch in 24 hours, run for 7–14 days, and deliver guaranteed views at $1.50 per 1,000, often beating that with organic lift. All posts use the official sound, tag the artist, follow your branding, and come with full campaign reporting plus UGC reuse rights.",
-    timeframe: "2–4 weeks",
-    visualizer: "tiles",
-    pricing: [
-      { label: "Cost Per 1K Views", price: "$1.50", detail: "Often lower with organic lift", numericPrice: 1.5 },
-      { label: "10K Views", price: "$15", numericPrice: 15 },
-      { label: "100K Views", price: "$150", featured: true, numericPrice: 150 },
-      { label: "500K Views", price: "$750", numericPrice: 750 },
-      { label: "1M Views", price: "$1,500", numericPrice: 1500 },
-    ],
-  },
-  {
-    id: "fanpages",
-    title: "Fan Page Management",
-    description:
-      "Fan Page Management provides a long-term approach to building and centralizing fandoms through owned community assets. These dedicated social media accounts consistently engage fans between releases, amplify key moments, and drive measurable outcomes including streaming, ticket sales, merchandise, and official social growth.",
-    timeframe: "Minimum 3 months",
+      "Dedicated accounts on fresh profiles provide a long-term approach to building communities through owned social assets. Fan Accounts (faceless, VA-managed) serve artists, while UGC Accounts (actor-driven, vetted creators) serve brands. All packages include a 3-month minimum commitment, and the client owns all accounts and content.",
+    timeframe: "3-month minimum",
     visualizer: "network",
+    note: "Two sub-types: Fan Accounts (faceless; for artists) managed by VAs, and UGC Accounts (actor-driven; for brands) managed by vetted creators.",
     pricing: [
-      { label: "Basic", price: "$500/mo", detail: "1 managed account", numericPrice: 500, isMonthly: true },
-      { label: "Plus", price: "$900/mo", detail: "2 managed accounts", numericPrice: 900, isMonthly: true },
-      { label: "Pro", price: "$1,600/mo", detail: "4 managed accounts", featured: true, numericPrice: 1600, isMonthly: true },
-      { label: "Scale", price: "$3,000/mo", detail: "8+ managed accounts", numericPrice: 3000, isMonthly: true },
+      { label: "Basic", price: "$15,000/mo", detail: "9 accounts (3/platform) · 270 posts", numericPrice: 15000, isMonthly: true },
+      { label: "Plus", price: "$22,500/mo", detail: "15 accounts (5/platform) · 450 posts", numericPrice: 22500, isMonthly: true },
+      { label: "Pro", price: "$32,500/mo", detail: "24 accounts (8/platform) · 720 posts", featured: true, numericPrice: 32500, isMonthly: true },
+      { label: "Scale", price: "$40,000/mo", detail: "30 accounts (10/platform) · 900 posts", numericPrice: 40000, isMonthly: true },
     ],
   },
   {
-    id: "ugc-accounts",
-    title: "Dedicated UGC Accounts",
+    id: "marketplace",
+    title: "Marketplace Campaigns",
     description:
-      "Dedicated UGC Accounts are fresh creator accounts making content specifically built for conversion. Unlike clipping, which focuses on awareness, this offering is performance-driven and focused on driving users directly to products or actions through strong CTAs.",
-    timeframe: "Minimum 3 months",
-    visualizer: "funnel",
-    pricing: [
-      { label: "Starter", price: "$800/mo", detail: "2 dedicated accounts", numericPrice: 800, isMonthly: true },
-      { label: "Growth", price: "$1,500/mo", detail: "4 dedicated accounts", featured: true, numericPrice: 1500, isMonthly: true },
-      { label: "Scale", price: "$2,800/mo", detail: "8+ dedicated accounts", numericPrice: 2800, isMonthly: true },
-    ],
-  },
-  {
-    id: "culture-edits",
-    title: "Culture Edits",
-    description:
-      "Get your song placed in cinematic and sports edits across established pages with active audiences. These trusted pages already post high-engagement edits daily. We handle placement logistics and can align edits to specific aesthetics or demographics.",
-    timeframe: "2–3 weeks",
+      "CPM-based campaigns across verticals. Any user can run campaigns with a minimum $2K budget ($1K for music). We handle creator sourcing, content production, and distribution across the relevant platforms.",
     visualizer: "chart",
+    budgetBased: true,
+    minimum: "$2K budget ($1K for music)",
+    categories: [
+      { label: "Music", cpm: 2, cost: 1, minBudget: 1000 },
+      { label: "Podcast", cpm: 2, cost: 1.25, minBudget: 2000 },
+      { label: "Sports", cpm: 2, cost: 1.25, minBudget: 2000 },
+      { label: "TV/Film", cpm: 3, cost: 1.5, minBudget: 2000 },
+      { label: "Politics", cpm: 4, cost: 2, minBudget: 2000 },
+      { label: "Out-of-Scope", cpm: 0, cost: 0, minBudget: 10000 },
+    ],
     pricing: [
-      { label: "Single Placement", price: "$250", detail: "One established page", numericPrice: 250 },
-      { label: "3-Pack", price: "$650", detail: "Three placements", featured: true, numericPrice: 650 },
-      { label: "Campaign", price: "$1,500", detail: "8+ placements across demographics", numericPrice: 1500 },
+      { label: "Music", price: "$2 CPM", detail: "Min $1K budget", numericPrice: 2 },
+      { label: "Podcast", price: "$2 CPM", detail: "Min $2K budget", numericPrice: 2 },
+      { label: "Sports", price: "$2 CPM", detail: "Min $2K budget", numericPrice: 2 },
+      { label: "TV/Film", price: "$3 CPM", detail: "Min $2K budget", numericPrice: 3 },
+      { label: "Politics", price: "$4 CPM", detail: "Min $2K budget", numericPrice: 4 },
+      { label: "Out-of-Scope", price: "Custom", detail: "Min $10K budget", numericPrice: 0 },
     ],
   },
   {
@@ -144,12 +149,11 @@ export const services: Service[] = [
       "Mass-posting your track across 10,000+ real TikTok UGC videos, primarily from international nano-creators with a handful of macros mixed in. Campaigns often drive spillover beyond 10,000 posts depending on performance. This method builds massive volume and algorithmic lift through real creator accounts.",
     timeframe: "3–4 weeks",
     visualizer: "tiles",
+    flatPrice: 12000,
     pricing: [
-      { label: "10K Posts", price: "$3,000", numericPrice: 3000 },
-      { label: "25K Posts", price: "$6,500", featured: true, numericPrice: 6500 },
-      { label: "50K Posts", price: "$11,000", numericPrice: 11000 },
+      { label: "Creator Flood", price: "$12,000", numericPrice: 12000 },
     ],
-    note: "Campaigns often exceed guaranteed post count through organic spillover.",
+    note: "Flat rate. Campaigns often exceed guaranteed post count through organic spillover.",
   },
   {
     id: "trending",
@@ -158,23 +162,20 @@ export const services: Service[] = [
       "We guarantee your track appears on Top 50 trending charts across YouTube Shorts, Instagram Reels, and Facebook Reels, and enters the Popular Tab on TikTok. The process uses a hybrid of AI-generated quantity content and real UGC, prioritizing volume to push traction until the track charts.",
     timeframe: "2–3 weeks",
     visualizer: "chart",
+    flatPrice: 14000,
     pricing: [
-      { label: "YouTube Shorts Top 50", price: "$2,500", numericPrice: 2500 },
-      { label: "IG Reels Top 50", price: "$2,500", numericPrice: 2500 },
-      { label: "FB Reels Top 50", price: "$2,000", numericPrice: 2000 },
-      { label: "TikTok Popular Tab", price: "$3,000", featured: true, numericPrice: 3000 },
-      { label: "Full Bundle", price: "$8,500", detail: "All platforms included", featured: true, numericPrice: 8500 },
+      { label: "Top 50 Trending", price: "$14,000", numericPrice: 14000 },
     ],
   },
   {
     id: "paid-amplification",
-    title: "Paid Amplification",
+    title: "Paid Amplification (Meta/TikTok Spark Ads)",
     description:
       "TikTok Spark Ads whitelist top-performing organic content and amplify it through paid distribution, maintaining authenticity while scaling reach. Meta Ads extend your campaign across Instagram and Facebook with precision targeting. Both channels come with full creative production, strategic optimization, and transparent reporting.",
     visualizer: "signal",
     budgetBased: true,
     pricing: [
-      { label: "Creative Fee", price: "$1,000", detail: "10 assets included", numericPrice: 1000 },
+      { label: "Creative Fee", price: "$1,000", detail: "10 assets included ($100 each additional)", numericPrice: 1000 },
       { label: "Up to $5K Spend", price: "30% fee", detail: "Of total ad spend", isPercentage: true },
       { label: "$5K–$10K Spend", price: "20% fee", detail: "Of total ad spend", isPercentage: true },
       { label: "$10K+ Spend", price: "10% fee", detail: "Of total ad spend", isPercentage: true },
