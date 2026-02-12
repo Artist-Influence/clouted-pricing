@@ -58,8 +58,8 @@ function getSelectableTiers(service: Service) {
   );
 }
 
-function calcServiceCost(service: Service, sel: ServiceSelection): number {
-  if (!sel.enabled) return 0;
+function calcServiceCost(service: Service, sel: ServiceSelection | undefined): number {
+  if (!sel || !sel.enabled) return 0;
 
   // Flat-price services
   if (service.flatPrice) return service.flatPrice;
