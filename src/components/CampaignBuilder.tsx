@@ -396,7 +396,7 @@ function ServiceRow({
                   value={String(sel.categoryIndex)}
                   onValueChange={handleCategoryChange}
                 >
-                  <SelectTrigger className="w-36 bg-background/50">
+                  <SelectTrigger className="w-48 bg-background/50">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
