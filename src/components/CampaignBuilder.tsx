@@ -392,7 +392,7 @@ function ServiceRow({
     >
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
          {/* Toggle + name */}
-         <div className="flex items-center gap-3 sm:w-56 shrink-0">
+         <div className="flex items-center gap-3 shrink-0">
            <Switch
              checked={sel.enabled}
              onCheckedChange={(checked) =>
