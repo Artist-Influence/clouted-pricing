@@ -114,10 +114,10 @@ export const services: Service[] = [
     visualizer: "network",
     note: "Two sub-types: Fan Accounts (faceless; for artists) managed by VAs, and UGC Accounts (actor-driven; for brands) managed by vetted creators.",
     pricing: [
-      { label: "Basic", price: "$15,000/mo", detail: "9 accounts (3/platform) · 270 posts", numericPrice: 15000, isMonthly: true },
-      { label: "Plus", price: "$22,500/mo", detail: "15 accounts (5/platform) · 450 posts", numericPrice: 22500, isMonthly: true },
-      { label: "Pro", price: "$32,500/mo", detail: "24 accounts (8/platform) · 720 posts", featured: true, numericPrice: 32500, isMonthly: true },
-      { label: "Scale", price: "$40,000/mo", detail: "30 accounts (10/platform) · 900 posts", numericPrice: 40000, isMonthly: true },
+      { label: "Basic", price: "$15,000/mo", detail: "9 total accounts (3 per platform) | 270 posts", numericPrice: 15000, isMonthly: true },
+      { label: "Plus", price: "$22,500/mo", detail: "15 total accounts (5 per platform) | 450 posts", numericPrice: 22500, isMonthly: true },
+      { label: "Pro", price: "$32,500/mo", detail: "24 total accounts (8 per platform) | 720 posts", featured: true, numericPrice: 32500, isMonthly: true },
+      { label: "Scale", price: "$40,000/mo", detail: "30 total accounts (10 per platform) | 900 posts", numericPrice: 40000, isMonthly: true },
     ],
   },
   {
