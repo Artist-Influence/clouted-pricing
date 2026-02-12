@@ -32,9 +32,6 @@ const ServiceAccordion = () => {
                     {service.timeframe}
                   </Badge>
                 )}
-                <span className="ml-auto text-sm font-medium text-primary mr-2">
-                  {pricePreview}
-                </span>
               </div>
             </AccordionTrigger>
             <AccordionContent>
