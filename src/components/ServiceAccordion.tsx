@@ -22,8 +22,8 @@ const ServiceAccordion = () => {
             value={service.id}
             className="glass-card rounded-xl border-none px-5 py-1 overflow-hidden"
           >
-            <AccordionTrigger className="hover:no-underline gap-4">
-              <div className="flex flex-1 items-center gap-3 flex-wrap">
+             <AccordionTrigger className="hover:no-underline gap-4">
+               <div className="flex flex-1 items-center gap-3 flex-wrap text-left">
                 <span className="text-base font-semibold text-foreground">
                   {service.title}
                 </span>
