@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { services, type Service, type PricingItem } from "@/data/services";
+import { services, filterServicesByIndustry, type Service, type PricingItem } from "@/data/services";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -89,7 +89,13 @@ function calcServiceCost(
   return tier?.numericPrice ?? 0;
 }
 
-const CampaignBuilder = () => {
+interface CampaignBuilderProps {
+  industry: "music" | "other";
+}
+
+const CampaignBuilder = ({ industry }: CampaignBuilderProps) => {
+  const filteredServices = useMemo(() => filterServicesByIndustry(industry), [industry]);
+
   const [selections, setSelections] = useState<Selections>(() => {
     const init: Selections = {};
     services.forEach((s) => (init[s.id] = defaultSelection()));
@@ -132,7 +138,7 @@ const CampaignBuilder = () => {
   const { total, monthlyTotal, hasMonthly } = useMemo(() => {
     let oneTime = 0;
     let monthly = 0;
-    services.forEach((s) => {
+    filteredServices.forEach((s) => {
       const sel = selections[s.id];
       if (!sel) return;
       const cost = calcServiceCost(s, sel);
@@ -145,13 +151,13 @@ const CampaignBuilder = () => {
       }
     });
     return { total: oneTime, monthlyTotal: monthly, hasMonthly: monthly > 0 };
-  }, [selections]);
+  }, [selections, filteredServices]);
 
   return (
     <div className="space-y-8">
       {/* Service rows */}
       <div className="space-y-3">
-        {services.map((service) => {
+        {filteredServices.map((service) => {
           const sel = selections[service.id];
           if (!sel) return null;
           const tiers = getSelectableTiers(service);

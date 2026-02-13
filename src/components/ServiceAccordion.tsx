@@ -1,4 +1,4 @@
-import { services } from "@/data/services";
+import { services, filterServicesByIndustry } from "@/data/services";
 import PricingCard from "@/components/deck/PricingCard";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -8,10 +8,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const ServiceAccordion = () => {
+interface ServiceAccordionProps {
+  industry: "music" | "other";
+}
+
+const ServiceAccordion = ({ industry }: ServiceAccordionProps) => {
+  const filteredServices = filterServicesByIndustry(industry);
+
   return (
     <Accordion type="multiple" className="space-y-3">
-      {services.map((service) => {
+      {filteredServices.map((service) => {
         const featuredPricing = service.pricing.find((p) => p.featured);
         const pricePreview = featuredPricing?.price ?? service.pricing[0]?.price ?? "";
         const hasMinimumColumn = service.pricing.some((p) => p.minimumDetail);
