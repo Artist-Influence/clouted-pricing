@@ -1,9 +1,17 @@
+import { useState } from "react";
 import ServiceAccordion from "@/components/ServiceAccordion";
 import CampaignBuilder from "@/components/CampaignBuilder";
 import AuroraBackground from "@/components/AuroraBackground";
+import IndustryGate from "@/components/IndustryGate";
 import cloutedLogo from "@/assets/clouted-logo.png";
 
 const Index = () => {
+  const [industry, setIndustry] = useState<"music" | "other" | null>(null);
+
+  if (!industry) {
+    return <IndustryGate onSelect={setIndustry} />;
+  }
+
   return (
     <div className="min-h-screen deck-bg relative">
       <AuroraBackground />
@@ -19,12 +27,18 @@ const Index = () => {
           the campaign builder to mix and match into a custom growth plan scaled
           to your budget.
         </p>
+        <button
+          onClick={() => setIndustry(null)}
+          className="mt-4 text-xs text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2 transition-colors"
+        >
+          Switch industry
+        </button>
       </header>
 
       {/* Services */}
       <section className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pb-20">
         <h2 className="text-2xl font-bold text-foreground mb-6">Our Services</h2>
-        <ServiceAccordion />
+        <ServiceAccordion industry={industry} />
       </section>
 
       {/* Campaign Builder */}
@@ -36,7 +50,7 @@ const Index = () => {
           Toggle services on, pick a tier or set a budget, and watch your
           estimate update live. Or start with a preset.
         </p>
-        <CampaignBuilder />
+        <CampaignBuilder industry={industry} />
       </section>
 
       {/* Closing */}

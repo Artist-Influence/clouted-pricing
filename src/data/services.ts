@@ -10,6 +10,8 @@ export interface PricingItem {
   cpmValue?: number;
 }
 
+export type IndustryType = "music" | "other" | "both";
+
 export interface Service {
   id: string;
   title: string;
@@ -24,12 +26,18 @@ export interface Service {
   flatPrice?: number;
   multiSelect?: boolean;
   categories?: { label: string; cpm: number; cost: number; minBudget: number }[];
+  industry: IndustryType;
+}
+
+export function filterServicesByIndustry(industry: "music" | "other") {
+  return services.filter((s) => s.industry === industry || s.industry === "both");
 }
 
 export const services: Service[] = [
   {
     id: "fan-accounts",
     title: "Fan Accounts",
+    industry: "music",
     description:
       "Faceless fan accounts managed by trained VAs for music artists across TikTok, YouTube Shorts, and Instagram Reels. Each package multiplies unique accounts across all three platforms. The client owns all accounts and content. 3-month minimum commitment.",
     timeframe: "3-month minimum",
@@ -43,6 +51,7 @@ export const services: Service[] = [
   {
     id: "managed-ugc",
     title: "Managed UGC Program",
+    industry: "other",
     description:
       "Full-service UGC program with vetted creators producing original content for brands and non-music verticals across TikTok and Instagram. We handle creator sourcing, briefing, production, and distribution. The client owns all content. 3-month minimum commitment.",
     timeframe: "3-month minimum",
@@ -55,6 +64,7 @@ export const services: Service[] = [
   {
     id: "marketplace",
     title: "Clipping",
+    industry: "both",
     description:
       "CPM-based campaigns across verticals. Any user can run campaigns with a minimum $2K budget ($1K for music). We handle creator sourcing, content production, and distribution across the relevant platforms.",
     visualizer: "chart",
@@ -80,6 +90,7 @@ export const services: Service[] = [
   {
     id: "creator-flood",
     title: "TikTok Creator Flood",
+    industry: "music",
     description:
       "Mass-posting your track across 10,000+ real TikTok UGC videos, primarily from international nano-creators with a handful of macros mixed in. Campaigns often drive spillover beyond 10,000 posts depending on performance. This method builds massive volume and algorithmic lift through real creator accounts.",
     timeframe: "3–4 weeks",
@@ -93,6 +104,7 @@ export const services: Service[] = [
   {
     id: "trending",
     title: "Top 50 Trending & Popular Tab",
+    industry: "music",
     description:
       "We guarantee your track appears on Top 50 trending charts across YouTube Shorts, Instagram Reels, and Facebook Reels, and enters the Popular Tab on TikTok. The process uses a hybrid of AI-generated quantity content and real UGC, prioritizing volume to push traction until the track charts.",
     timeframe: "2–3 weeks",
@@ -105,6 +117,7 @@ export const services: Service[] = [
   {
     id: "paid-amplification",
     title: "Paid Amplification (Meta/TikTok Spark Ads)",
+    industry: "both",
     description:
       "TikTok Spark Ads whitelist top-performing organic content and amplify it through paid distribution, maintaining authenticity while scaling reach. Meta Ads extend your campaign across Instagram and Facebook with precision targeting. Both channels come with full creative production, strategic optimization, and transparent reporting.",
     visualizer: "signal",
@@ -119,6 +132,7 @@ export const services: Service[] = [
   {
     id: "spotify",
     title: "Spotify Playlisting (Organic)",
+    industry: "music",
     description:
       "We run fully organic Spotify campaigns that place your music on third-party playlists curated for your genre, helping you reach real listeners—not bots—and trigger Spotify's algorithm. Each campaign is designed for maximum discovery, often resulting in Discover Weekly or Radio placements, with strong performance in both U.S. and global markets. Stream goals are guaranteed, and every campaign includes weekly reporting, performance tracking, and strategic playlist placement to boost saves, followers, and engagement.",
     timeframe: "90 days",
@@ -147,6 +161,7 @@ export const services: Service[] = [
   {
     id: "soundcloud",
     title: "SoundCloud Reposts",
+    industry: "music",
     description:
       "We tap into an underground network of verified SoundCloud artists and labels to organically repost your track across genre-specific communities. With over 50 million active U.S.-based listeners reached through our repost groups, this service connects your music with passionate fans who actively seek new sounds. Campaigns are fully transparent, trackable, and optimized to foster genuine fan engagement rather than passive plays.",
     visualizer: "network",
@@ -164,6 +179,7 @@ export const services: Service[] = [
   {
     id: "youtube",
     title: "YouTube Advertising",
+    industry: "music",
     description:
       "Our YouTube ad campaigns turn music videos into highly optimized promotional assets using strategic international targeting and our proprietary view-to-engagement ratio engine. By tapping into global markets with ultra-low CPVs, we maximize reach while ensuring your video resonates with viewers. Whether you're focused on subscribers, long-form engagement, or workarounds for unapproved videos, we tailor every campaign for high impact and transparent reporting.",
     timeframe: "1–3 weeks",
@@ -184,6 +200,7 @@ export const services: Service[] = [
   {
     id: "instagram",
     title: "Instagram Seeding",
+    industry: "music",
     description:
       "Instagram seeding places your music on genre-aligned fan pages where your target audience already hangs out. We handpick creators for each campaign to ensure relevance and cost-efficiency, maximizing ROI and discovery. Every post tags the artist, links the sound, and is tracked via a live dashboard for real-time results.",
     visualizer: "tiles",
